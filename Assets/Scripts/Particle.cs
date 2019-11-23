@@ -12,13 +12,14 @@ public class Particle : MonoBehaviour
 
     protected Vector3 pVelocity; // Possible velocity
     protected Vector3 aVelocity; // Actual velocity
+    protected float gravity;
 
     protected virtual void OnEnable()
     {
         time2die = Random.Range(0, lifetime) + Time.time;
 
         float wSpeed = pVelocity.magnitude; // Wanted Velocity
-        
+
         aVelocity.x = Random.Range(-pVelocity.x, pVelocity.x);
         aVelocity.y = Random.Range(-pVelocity.y, pVelocity.y);
         aVelocity.z = Random.Range(-pVelocity.z, pVelocity.z);
@@ -40,7 +41,8 @@ public class Particle : MonoBehaviour
         }
         else if (!paused)
         {
-            transform.position += aVelocity;
+            transform.position += aVelocity * Time.deltaTime;
+            aVelocity.y -= gravity * Time.deltaTime;
         }
     }
 
@@ -66,5 +68,11 @@ public class Particle : MonoBehaviour
     {
         get { return pVelocity; }
         set { pVelocity = value; }
+    }
+
+    public virtual float Gravity
+    {
+        get { return gravity; }
+        set { gravity = value; }
     }
 }

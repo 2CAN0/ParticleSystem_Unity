@@ -401,19 +401,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75b7e5a2864d94e44a90e8b883d5ec6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxParticles: 50
-  lifetime: 5
+  maxParticles: 1000
+  lifetime: 10
   particle: {fileID: 2328341659585615583, guid: 5821aba5d3e094741ae5f49adc0a3124,
     type: 3}
   scale: 0.5
-  velocity: {x: 0.5, y: 0.5, z: 0.5}
-  particleType: 1
+  velocity: {x: 0.2, y: 5, z: 0.2}
+  particleType: 0
   billboardObject: {fileID: 0}
   particleSprite: {fileID: 21300000, guid: 371e5cace69de60499d965c6483eb13e, type: 3}
-  particleColor: {r: 1, g: 0, b: 0, a: 0.2627451}
+  particleColor: {r: 1, g: 1, b: 1, a: 0.039215688}
   loop: 1
   rotate: 0
-  rotationSpeed: {x: 5, y: 5, z: 5}
+  rotationSpeed: {x: 5, y: 5, z: 0.5}
+  useWind: 0
+  wind: {x: 0, y: 0, z: 0}
+  useGravity: 1
+  gravity: 5
 --- !u!4 &1311316779
 Transform:
   m_ObjectHideFlags: 0
@@ -439,5 +443,5 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 2, y: 2, z: 2}
+  m_Size: {x: 10, y: 10, z: 10}
   m_Center: {x: 0, y: 0, z: 0}

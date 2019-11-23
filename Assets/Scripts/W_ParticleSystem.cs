@@ -92,11 +92,36 @@ public class W_ParticleSystem : Editor
         EditorGUILayout.PropertyField(serializedObject.FindProperty("rotate"));
         EditorGUILayout.HelpBox("Do you want your particles to be rotating?\n(The use of rotation has a big impact on the games performance!)", MessageType.None);
 
-        if (ps.Rotate)
+        if (ps.Rotate && ps.ParticleMode == ParticleType.MeshParticle)
         {
             EditorGUILayout.PropertyField(serializedObject.FindProperty("rotationSpeed"));
         }
+        else if (ps.Rotate && ps.ParticleMode == ParticleType.Billboard)
+        {
+            Vector3 rotSpeed = ps.RotationSpeed;
+            rotSpeed.z = EditorGUILayout.FloatField("Rotation Speed", ps.RotationSpeed.z);
+            ps.RotationSpeed = rotSpeed;
+        }
         //////////////////////////
+
+        GUILayout.Space(20);
+
+        ///// Physics Settings /////
+        GUILayout.Label("Physics Settings", labelStyle);
+
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("useGravity"), true);
+        if (ps.UseGravity)
+        {
+            ps.Gravity = EditorGUILayout.FloatField("Gravity", ps.Gravity);
+            GUILayout.Space(10);
+        }
+
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("useWind"), true);
+        if (ps.UseWind)
+        {
+            ps.Wind = EditorGUILayout.Vector3Field("Wind Speed", ps.Wind);
+            GUILayout.Space(10);
+        }
 
         serializedObject.ApplyModifiedProperties();
     }

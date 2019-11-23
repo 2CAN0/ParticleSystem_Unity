@@ -38,7 +38,6 @@ public class MeshParticle : Particle
         if (!paused && useRotation)
         {
             transform.Rotate(aRotationSpeed);
-            Debug.Log("Rotation Speed: " + aRotationSpeed + " | Actual Rotation: " + transform.rotation.eulerAngles);
         }
     }
 

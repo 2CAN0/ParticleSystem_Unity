@@ -25,12 +25,22 @@ public class ParticleSystem : MonoBehaviour
     [SerializeField] Vector3 rotationSpeed;
     private bool playing = false;
 
+    // Physics Settings
+    [SerializeField] bool useWind = false;
+    [SerializeField] Vector3 wind;
+    [SerializeField] bool useGravity = false;
+    [SerializeField] float gravity;
+
+
 
 
     void Awake()
     {
         particles = new List<GameObject>();
         ogScale = new Vector3(Particle.transform.localScale.x, Particle.transform.localScale.y, Particle.transform.localScale.z);
+
+        if(!useGravity)
+            gravity = 0;
 
         if (particleType == ParticleType.Billboard)
         {
@@ -59,6 +69,7 @@ public class ParticleSystem : MonoBehaviour
                 p.PossibleVelocity = Velocity;
                 p.UseRotation = rotate;
                 p.RotationSpeed = RotationSpeed;
+                p.Gravity = gravity;
             }
             else if (particleType == ParticleType.Billboard)
             {
@@ -67,6 +78,13 @@ public class ParticleSystem : MonoBehaviour
                 BillboardParticle p = particles[iParticle].AddComponent<BillboardParticle>();
                 p.Lifetime = Lifetime;
                 p.PossibleVelocity = Velocity;
+                p.Gravity = gravity;
+
+                if (rotate)
+                {
+                    p.UseRotation = true;
+                    p.RotationSpeed = rotationSpeed.z;
+                }
 
                 if (ParticleColor != null)
                 {
@@ -94,7 +112,7 @@ public class ParticleSystem : MonoBehaviour
                         particle.transform.position = this.transform.position;
                     else
                     {
-                        if(particleType == ParticleType.Billboard)
+                        if (particleType == ParticleType.Billboard)
                             particle.GetComponent<BillboardParticle>().ParticleColor = ParticleColor;
 
                         particle.transform.position = GetRandomLocation(GetComponent<BoxCollider>());
@@ -230,6 +248,32 @@ public class ParticleSystem : MonoBehaviour
         get { return particleColor; }
         set { particleColor = value; }
     }
+
+    public bool UseWind
+    {
+        get { return useWind; }
+        set { useWind = value; }
+    }
+
+    public Vector3 Wind
+    {
+        get { return wind; }
+        set { wind = value; }
+    }
+
+    public bool UseGravity
+    {
+        get { return useGravity; }
+        set { useGravity = value; }
+    }
+
+    public float Gravity
+    {
+        get { return gravity; }
+        set { gravity = value; }
+    }
+
+
 }
 
 public enum ParticleType
