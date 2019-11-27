@@ -1,5 +1,7 @@
 fileFormatVersion: 2
 guid: 75b7e5a2864d94e44a90e8b883d5ec6e
+labels:
+- Particles
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2

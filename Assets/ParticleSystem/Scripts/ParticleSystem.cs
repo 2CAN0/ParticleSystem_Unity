@@ -7,12 +7,17 @@ public class ParticleSystem : MonoBehaviour
     // Particle Variables
     [SerializeField] int maxParticles = 500;
     [SerializeField] float lifetime;
-    List<GameObject> particles;
+    List<GameObject> particles = new List<GameObject>();
     [SerializeField] GameObject particle;
+    [SerializeField] ParticleType particleType;
     [SerializeField] float scale;
     Vector3 ogScale;
     [SerializeField] Vector3 velocity;
-    [SerializeField] ParticleType particleType;
+    [SerializeField] bool useRandomVelocity;
+    [SerializeField] Vector3 rVelocity; // Random bounds of velocity
+
+    // Mesh particles Variables
+    [SerializeField] Material particleMaterial;
 
     // Billboard Particle stuff
     [SerializeField] GameObject billboardObject;
@@ -21,8 +26,10 @@ public class ParticleSystem : MonoBehaviour
 
     // Particle System settings
     [SerializeField] bool loop = false;
-    [SerializeField] bool rotate = false;
+    [SerializeField] bool useRotation = false;
     [SerializeField] Vector3 rotationSpeed;
+    [SerializeField] bool useScaleOverLifetime = false;
+    [SerializeField] Vector2 scaleGradient;
     private bool playing = false;
 
     // Physics Settings
@@ -32,15 +39,15 @@ public class ParticleSystem : MonoBehaviour
     [SerializeField] float gravity;
 
 
-
-
     void Awake()
     {
-        particles = new List<GameObject>();
+        // particles = new List<GameObject>();
         ogScale = new Vector3(Particle.transform.localScale.x, Particle.transform.localScale.y, Particle.transform.localScale.z);
 
-        if(!useGravity)
+        if (!useGravity)
             gravity = 0;
+        if (useRandomVelocity)
+            rVelocity = Vector3.zero;
 
         if (particleType == ParticleType.Billboard)
         {
@@ -57,19 +64,35 @@ public class ParticleSystem : MonoBehaviour
             billboardObject.AddComponent<SpriteRenderer>();
             billboardObject.GetComponent<SpriteRenderer>().sprite = particleSprite;
         }
+        else if (particleType == ParticleType.MeshParticle)
+        {
+            if (!Particle.name.ToLower().Contains("particle"))
+                Particle.name = Particle.name + " Particle";
+        }
+
 
         for (int iParticle = 0; iParticle < maxParticles; iParticle++)
         {
             if (particleType == ParticleType.MeshParticle)
             {
                 particles.Add(Instantiate(particle));
+                try { if (particleMaterial != null) particles[iParticle].GetComponent<Renderer>().material = particleMaterial; } catch { }
 
                 MeshParticle p = particles[iParticle].AddComponent<MeshParticle>();
                 p.Lifetime = Lifetime;
                 p.PossibleVelocity = Velocity;
-                p.UseRotation = rotate;
+                p.RandomVelocity = rVelocity;
+                p.UseRotation = useRotation;
                 p.RotationSpeed = RotationSpeed;
                 p.Gravity = gravity;
+
+                if (useScaleOverLifetime)
+                {
+                    p.UseScaleOverLife = true;
+                    p.ScaleOverLife = scaleGradient;
+                }
+                else
+                    p.UseScaleOverLife = false;
             }
             else if (particleType == ParticleType.Billboard)
             {
@@ -78,9 +101,10 @@ public class ParticleSystem : MonoBehaviour
                 BillboardParticle p = particles[iParticle].AddComponent<BillboardParticle>();
                 p.Lifetime = Lifetime;
                 p.PossibleVelocity = Velocity;
+                p.RandomVelocity = rVelocity;
                 p.Gravity = gravity;
 
-                if (rotate)
+                if (useRotation)
                 {
                     p.UseRotation = true;
                     p.RotationSpeed = rotationSpeed.z;
@@ -90,9 +114,17 @@ public class ParticleSystem : MonoBehaviour
                 {
                     p.ParticleColor = ParticleColor;
                 }
+
+                if (useScaleOverLifetime)
+                {
+                    p.UseScaleOverLife = true;
+                    p.ScaleOverLife = scaleGradient;
+                }
+                else
+                    p.UseScaleOverLife = false;
             }
 
-            // particles[iParticle].hideFlags = HideFlags.HideInHierarchy;
+            particles[iParticle].hideFlags = HideFlags.HideInHierarchy;
             particles[iParticle].transform.SetParent(this.transform);
             particles[iParticle].SetActive(false);
         }
@@ -116,7 +148,8 @@ public class ParticleSystem : MonoBehaviour
                             particle.GetComponent<BillboardParticle>().ParticleColor = ParticleColor;
 
                         particle.transform.position = GetRandomLocation(GetComponent<BoxCollider>());
-                        SetRandomScale(particle);
+                        if (!useScaleOverLifetime)
+                            SetRandomScale(particle);
                         particle.SetActive(true);
                     }
                 }
@@ -198,7 +231,15 @@ public class ParticleSystem : MonoBehaviour
     public float Lifetime
     {
         get { return lifetime; }
-        set { lifetime = value; }
+        set
+        {
+            lifetime = value;
+            foreach (GameObject pl in particles)
+            {
+                Particle _pl = pl.GetComponent<Particle>();
+                _pl.Lifetime = Lifetime;
+            }
+        }
     }
 
     public GameObject Particle
@@ -213,22 +254,47 @@ public class ParticleSystem : MonoBehaviour
         set { scale = value; }
     }
 
+    public bool UseGradientScale
+    {
+        get { return useScaleOverLifetime; }
+        set { useScaleOverLifetime = value; }
+    }
+
+    public Vector2 ScaleGradient
+    {
+        get { return scaleGradient; }
+        set
+        {
+            scaleGradient = value;
+            if (scaleGradient.x <= 0)
+                scaleGradient.x = 0.000001f;
+        }
+    }
+
     public Vector3 Velocity
     {
         get { return velocity; }
-        set { 
-            velocity = value; 
-            foreach(GameObject pl in particles){
+        set
+        {
+            velocity = value;
+            foreach (GameObject pl in particles)
+            {
                 Particle _pl = pl.GetComponent<Particle>();
                 _pl.PossibleVelocity = velocity;
             }
         }
     }
 
+    public bool UseRandomVelocity
+    {
+        get { return useRandomVelocity; }
+        set { useRandomVelocity = value; }
+    }
+
     public bool Rotate
     {
-        get { return rotate; }
-        set { rotate = value; }
+        get { return useRotation; }
+        set { useRotation = value; }
     }
 
     public Vector3 RotationSpeed
@@ -279,7 +345,34 @@ public class ParticleSystem : MonoBehaviour
         set { gravity = value; }
     }
 
+    public Vector3 RandomVelocity
+    {
+        get { return rVelocity; }
+        set
+        {
+            rVelocity = value;
+            if (rVelocity.x > 100)
+                rVelocity.x = 100;
+            else if (rVelocity.x < 0)
+                rVelocity.x = 0;
 
+            if (rVelocity.y > 100)
+                rVelocity.y = 100;
+            else if (rVelocity.y < 0)
+                rVelocity.y = 0;
+
+            if (rVelocity.z > 100)
+                rVelocity.z = 100;
+            else if (rVelocity.z < 0)
+                rVelocity.z = 0;
+
+            foreach (GameObject pl in particles)
+            {
+                Particle _pl = pl.GetComponent<Particle>();
+                _pl.RandomVelocity = rVelocity;
+            }
+        }
+    }
 }
 
 public enum ParticleType
