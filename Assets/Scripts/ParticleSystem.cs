@@ -216,7 +216,13 @@ public class ParticleSystem : MonoBehaviour
     public Vector3 Velocity
     {
         get { return velocity; }
-        set { velocity = value; }
+        set { 
+            velocity = value; 
+            foreach(GameObject pl in particles){
+                Particle _pl = pl.GetComponent<Particle>();
+                _pl.PossibleVelocity = velocity;
+            }
+        }
     }
 
     public bool Rotate
